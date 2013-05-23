@@ -48,11 +48,11 @@ module ResqueScheduler
     
     schedule_hash = prepare_schedule(schedule_hash)
 
-    # if Resque::Scheduler.dynamic
+    if Resque::Scheduler.dynamic
       schedule_hash.each do |name, job_spec|
         set_schedule(name, job_spec)
       end
-    # end
+    end
     @schedule = schedule_hash
   end
 
