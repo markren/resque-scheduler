@@ -43,19 +43,22 @@ module ResqueScheduler
   # params is an array, each element in the array is passed as a separate
   # param, otherwise params is passed in as the only parameter to perform.
   def schedule=(schedule_hash)
+    # clean the schedules as it exists in redis
+    clean_schedules
+    
     schedule_hash = prepare_schedule(schedule_hash)
 
-    if Resque::Scheduler.dynamic
+    # if Resque::Scheduler.dynamic
       schedule_hash.each do |name, job_spec|
         set_schedule(name, job_spec)
       end
-    end
+    # end
     @schedule = schedule_hash
   end
 
   # Returns the schedule hash
   def schedule
-    @schedule ||= {}
+    @schedule ||= get_schedules
   end
 
   # reloads the schedule from redis
@@ -74,6 +77,17 @@ module ResqueScheduler
     else
       nil
     end
+  end
+
+  # clean the schedules as it exists in redis
+  def clean_schedules
+    if redis.exists(:schedules)
+      redis.hkeys(:schedules).each do |key|
+        remove_schedule(key)
+      end
+    end
+    @schedule = nil
+    true
   end
 
   # Create or update a schedule with the provided name and configuration.

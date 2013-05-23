@@ -297,6 +297,7 @@ module Resque
       def shutdown
         @shutdown = true
         if @sleeping
+          Resque.clean_schedules
           release_master_lock!
           exit
         end
